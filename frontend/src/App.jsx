@@ -4,6 +4,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Onboarding from './pages/Onboarding';
 import Dashboard from './pages/Dashboard';
+import StaffLogin from './pages/Staff/StaffLogin';
+import AdminPanel from './pages/Staff/AdminPanel';
+import BakerPanel from './pages/Staff/BakerPanel';
 import { useAuth } from './context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
@@ -57,6 +60,9 @@ export default function App() {
               <Dashboard />
             </ProtectedRoute>
           } />
+          <Route path="/staff/login" element={<StaffLogin />} />
+          <Route path="/admin" element={<AdminPanel />} />
+          <Route path="/baker" element={<BakerPanel />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AnimatePresence>

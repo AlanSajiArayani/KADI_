@@ -7,7 +7,9 @@ const snackSchema = new mongoose.Schema({
   price: { type: Number },
   category: { type: String, enum: ['Sweet', 'Savory'] },
   rating: { type: Number, default: 0 },
-  image: { type: String }
+  image: { type: String },
+  quantity: { type: Number, default: 0 },
+  isActive: { type: Boolean, default: true }
 });
 
 module.exports = mongoose.model('Snack', snackSchema);

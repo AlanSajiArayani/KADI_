@@ -13,6 +13,9 @@ app.use(express.json());
 // Routes
 app.use('/auth', require('./routes/auth'));
 app.use('/api', require('./routes/api'));
+app.use('/staff/auth', require('./routes/staffAuth'));
+app.use('/admin', require('./routes/adminRoutes'));
+app.use('/baker', require('./routes/bakerRoutes'));
 
 // Serve Logo from system artifact path for demo purposes:
 app.get('/api/logo', (req, res) => {
@@ -20,7 +23,23 @@ app.get('/api/logo', (req, res) => {
 });
 
 mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/kadi')
-  .then(() => console.log('MongoDB Connected'))
+  .then(async () => {
+    console.log('MongoDB Connected');
+    
+    // Auto-create default Admin if not exists
+    const Staff = require('./models/Staff');
+    const bcrypt = require('bcryptjs');
+    try {
+      const adminExists = await Staff.findOne({ role: 'admin' });
+      if (!adminExists) {
+        const hashedPassword = await bcrypt.hash('admin123', 10);
+        await Staff.create({ username: 'admin', password: hashedPassword, role: 'admin' });
+        console.log('Default Admin Account Created (username: admin, password: admin123)');
+      }
+    } catch (e) {
+      console.log('Initialization failed', e.message);
+    }
+  })
   .catch(err => console.log('MongoDB connection error, continuing with mock data. Error:', err.message));
 
 app.listen(PORT, () => console.log(`Backend API running on http://localhost:${PORT}`));
