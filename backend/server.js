@@ -2,10 +2,23 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
+const http = require('http');
+const { Server } = require('socket.io');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const server = http.createServer(app);
+const io = new Server(server, { cors: { origin: '*' } });
+
+// Attach socket io to request
+app.use((req, res, next) => { req.io = io; next(); });
+
+io.on('connection', (socket) => {
+  socket.on('joinRoom', (roomId) => {
+    socket.join(roomId);
+  });
+});
 
 app.use(cors());
 app.use(express.json());
@@ -42,4 +55,4 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/kadi')
   })
   .catch(err => console.log('MongoDB connection error, continuing with mock data. Error:', err.message));
 
-app.listen(PORT, () => console.log(`Backend API running on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`Backend API running on http://localhost:${PORT}`));

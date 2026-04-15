@@ -117,19 +117,65 @@ body {
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.75rem 2rem;
   width: 90%;
   max-width: 1200px;
   border-radius: 50px;
+}
+
+.nav-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.75rem 2rem;
 }
 
 .nav-links {
   display: flex;
   gap: 2rem;
   align-items: center;
+}
+
+.mobile-menu-toggle {
+  display: none;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .navbar { border-radius: 24px; padding: 0; }
+  .nav-container { padding: 0.75rem 1.5rem; }
+  .mobile-menu-toggle { display: block; }
+  .nav-actions {
+    position: absolute;
+    top: 110%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: var(--glass-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    gap: 1.5rem;
+    box-shadow: var(--glass-shadow);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+  }
+  .nav-actions.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+  }
 }
 
 .nav-link {
@@ -292,3 +338,163 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+
+/* Bakery Catalog Grid */
+.bakery-catalog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.5rem;
+  width: 100%;
+  max-width: 1400px;
+  padding: 0 2rem;
+}
+
+@media (min-width: 768px) {
+  .bakery-catalog-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .bakery-catalog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Bakery Catalog Showcase */
+.bakery-showcase-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 32px;
+  overflow: hidden;
+  padding: 1.5rem;
+  gap: 1.5rem;
+  position: relative;
+  transition: all 0.4s ease;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  height: 100%;
+}
+
+.bakery-showcase-card:hover {
+  box-shadow: 0 16px 40px rgba(0,0,0,0.4), inset 0 0 0 1px var(--primary);
+  transform: translateY(-5px);
+}
+
+.bakery-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.bakery-name {
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-shadow: var(--glow);
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.bakery-desc-box {
+  background: rgba(249, 115, 22, 0.05);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  padding: 1.25rem;
+  border-radius: 20px;
+  color: var(--text-secondary);
+  font-size: 1rem;
+  line-height: 1.5;
+  flex: 1;
+}
+
+.bakery-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.icon-btn-glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  width: 55px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--glass-shadow);
+}
+
+.icon-btn-glass:hover {
+  box-shadow: var(--glow);
+  border-color: var(--primary);
+  transform: translateY(-2px) scale(1.05);
+}
+
+.bakery-image-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.bakery-image {
+  width: 100%;
+  aspect-ratio: 16/10;
+  object-fit: cover;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3), 0 0 15px rgba(249, 115, 22, 0.1);
+  border: 1px solid var(--glass-border);
+}
+
+/* Minimal Dashboard */
+.minimal-dashboard-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.minimal-dashboard-card {
+  padding: 4rem;
+  border-radius: 32px;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+/* Food Catalog Grid (5 columns max) */
+.food-catalog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+@media (min-width: 640px) {
+  .food-catalog-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 1024px) {
+  .food-catalog-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1280px) {
+  .food-catalog-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (min-width: 1536px) {
+  .food-catalog-grid { grid-template-columns: repeat(5, 1fr); }
+}
+

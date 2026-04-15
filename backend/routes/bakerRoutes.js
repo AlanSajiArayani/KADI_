@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const Staff = require('../models/Staff');
 const Bakery = require('../models/Bakery');
 const Snack = require('../models/Snack');
+const Order = require('../models/Order');
 
 const router = express.Router();
 router.use(authMiddleware, roleAuth(['baker']));
@@ -101,6 +102,70 @@ router.delete('/snacks/:id', async (req, res) => {
      }
      res.json({ success: true });
    } catch (err) { res.status(500).json({ error: 'Error deleting snack' }); }
+});
+
+// Manage Orders
+router.get('/orders', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.json([{
+        _id: 'mock_order_1',
+        userId: 'mock_user_1',
+        bakeryId: 'b1',
+        bakeryName: 'Liquid Mock Bakery',
+        items: [{ title: 'Offline Donut', price: 2.50, quantity: 2 }],
+        totalPrice: 5.00,
+        status: 'Preparing',
+        createdAt: new Date()
+      }]);
+    }
+
+    const bakery = await Bakery.findOne({ bakerId: req.user.userId });
+    if (!bakery) return res.json([]);
+    const orders = await Order.find({ bakeryId: bakery._id }).sort({ createdAt: -1 });
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching orders' });
+  }
+});
+
+router.put('/orders/:id/status', async (req, res) => {
+  try {
+    const { status } = req.body;
+
+    if (mongoose.connection.readyState !== 1) {
+      const mockOrder = {
+        _id: req.params.id,
+        userId: 'mock_user_1',
+        bakeryId: 'b1',
+        bakeryName: 'Liquid Mock Bakery',
+        items: [{ title: 'Offline Donut', price: 2.50, quantity: 2 }],
+        totalPrice: 5.00,
+        status,
+        createdAt: new Date()
+      };
+      if (req.io) req.io.to(`user_mock_user_1`).emit('orderUpdated', mockOrder);
+      return res.json(mockOrder);
+    }
+
+    const bakery = await Bakery.findOne({ bakerId: req.user.userId });
+    if (!bakery) return res.status(400).json({ error: 'Setup bakery first' });
+    
+    const order = await Order.findOneAndUpdate(
+      { _id: req.params.id, bakeryId: bakery._id },
+      { status },
+      { new: true }
+    );
+    
+    // Emit real-time update to the user
+    if (order && req.io) {
+      req.io.to(`user_${order.userId.toString()}`).emit('orderUpdated', order);
+    }
+    
+    res.json(order);
+  } catch (err) {
+    res.status(500).json({ error: 'Error updating order status' });
+  }
 });
 
 module.exports = router;

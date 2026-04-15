@@ -2,15 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useStaffAuth } from '../../context/StaffAuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LayoutDashboard, Coffee, LogOut, Plus, Edit2, Trash } from 'lucide-react';
+import { LayoutDashboard, Coffee, LogOut, Plus, Edit2, Trash, ClipboardList, CheckCircle } from 'lucide-react';
+import { io } from 'socket.io-client';
 import '../../staff.css';
 
 export default function BakerPanel() {
   const { staff, logoutStaff, token } = useStaffAuth();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('menu');
+  const [activeTab, setActiveTab] = useState('menu'); /* 'menu' or 'orders' */
   const [bakery, setBakery] = useState(null);
   const [snacks, setSnacks] = useState([]);
+  const [orders, setOrders] = useState([]);
   
   // Modals
   const [showBakeryModal, setShowBakeryModal] = useState(false);
@@ -26,25 +28,58 @@ export default function BakerPanel() {
     fetchProfile();
   }, [staff]);
 
+  useEffect(() => {
+    if (bakery && token) {
+      // Fetch initial orders
+      fetchOrders();
+
+      const socket = io('http://localhost:5000');
+      // Join bakery specific room to get new orders
+      socket.emit('joinRoom', bakery._id);
+      
+      socket.on('newOrder', (order) => {
+        setOrders(prev => [order, ...prev]);
+        // Optional alert or sound for the baker
+      });
+
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [bakery, token]);
+
   const fetchProfile = async () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const { data } = await axios.get('http://localhost:5000/baker/bakery', { headers });
       if (data) {
         setBakery(data);
-        fetchMenu();
+        fetchMenu(headers);
       } else {
         setShowBakeryModal(true);
       }
     } catch (err) { console.error(err); }
   };
 
-  const fetchMenu = async () => {
+  const fetchMenu = async (headers) => {
     try {
-      const headers = { Authorization: `Bearer ${token}` };
-      const { data } = await axios.get('http://localhost:5000/baker/snacks', { headers });
+      const { data } = await axios.get('http://localhost:5000/baker/snacks', { headers: headers || { Authorization: `Bearer ${token}` } });
       setSnacks(data);
     } catch (err) { console.error(err); }
+  };
+
+  const fetchOrders = async () => {
+    try {
+      const { data } = await axios.get('http://localhost:5000/baker/orders', { headers: { Authorization: `Bearer ${token}` } });
+      setOrders(data);
+    } catch (err) { console.error(err); }
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      const { data } = await axios.put(`http://localhost:5000/baker/orders/${orderId}/status`, { status: newStatus }, { headers: { Authorization: `Bearer ${token}` } });
+      setOrders(prev => prev.map(o => o._id === orderId ? data : o));
+    } catch (err) { console.error("Could not update order status", err); }
   };
 
   const handleBakerySubmit = async (e) => {
@@ -102,6 +137,9 @@ export default function BakerPanel() {
           <li className={`sidebar-item ${activeTab === 'menu' ? 'active' : ''}`} onClick={() => setActiveTab('menu')}>
             <Coffee size={20} /> Menu Items
           </li>
+          <li className={`sidebar-item ${activeTab === 'orders' ? 'active' : ''}`} onClick={() => setActiveTab('orders')}>
+            <ClipboardList size={20} /> Live Orders
+          </li>
           <li className="sidebar-item" onClick={() => {
             setBakeryForm({ name: bakery?.name||'', description: bakery?.description||'', lat: bakery?.location?.lat||'', lng: bakery?.location?.lng||'', image: bakery?.images?.[0]||'' });
             setShowBakeryModal(true);
@@ -116,22 +154,41 @@ export default function BakerPanel() {
 
       <main className="staff-content">
         <h1 style={{ marginBottom: '0.5rem' }}>{getGreeting()}, {staff?.username}</h1>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Manage your inventory and availability.</p>
+        <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>Manage your inventory and live orders.</p>
 
-        <div className="stat-grid">
-          <div className="stat-card">
-            <span className="stat-title">Total Items</span>
-            <span className="stat-value">{snacks.length}</span>
+        {activeTab === 'menu' && (
+          <div className="stat-grid">
+            <div className="stat-card">
+              <span className="stat-title">Total Items</span>
+              <span className="stat-value">{snacks.length}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-title">Available</span>
+              <span className="stat-value">{snacks.filter(s => s.quantity > 0).length}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-title">Out of Stock</span>
+              <span className="stat-value">{snacks.filter(s => s.quantity <= 0).length}</span>
+            </div>
           </div>
-          <div className="stat-card">
-            <span className="stat-title">Available</span>
-            <span className="stat-value">{snacks.filter(s => s.quantity > 0).length}</span>
+        )}
+
+        {activeTab === 'orders' && (
+          <div className="stat-grid">
+            <div className="stat-card" style={{ borderColor: 'var(--primary)', boxShadow: 'var(--glow)' }}>
+              <span className="stat-title">Pending Orders</span>
+              <span className="stat-value">{orders.filter(o => o.status === 'Pending').length}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-title">Preparing</span>
+              <span className="stat-value">{orders.filter(o => o.status === 'Preparing').length}</span>
+            </div>
+            <div className="stat-card">
+              <span className="stat-title">Completed Today</span>
+              <span className="stat-value">{orders.filter(o => o.status === 'Ready').length}</span>
+            </div>
           </div>
-          <div className="stat-card">
-            <span className="stat-title">Out of Stock</span>
-            <span className="stat-value">{snacks.filter(s => s.quantity <= 0).length}</span>
-          </div>
-        </div>
+        )}
 
         {activeTab === 'menu' && bakery && (
           <div>
@@ -185,6 +242,50 @@ export default function BakerPanel() {
                   {snacks.length === 0 && <tr><td colSpan="5" style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No items found. Start adding your menu!</td></tr>}
                 </tbody>
               </table>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'orders' && bakery && (
+          <div>
+            <h2 style={{ fontWeight: 300, marginBottom: '1.5rem' }}>Active Orders</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {orders.map(order => (
+                <div key={order._id} className="glass-panel" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem', borderLeft: order.status === 'Pending' ? '4px solid var(--primary)' : order.status === 'Ready' ? '4px solid #4ade80' : '4px solid #38bdf8' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--glass-border)', paddingBottom: '1rem' }}>
+                    <div>
+                      <h3 style={{ margin: 0 }}>Order: {order._id.substring(order._id.length - 6).toUpperCase()}</h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Placed: {new Date(order.createdAt).toLocaleTimeString()}</p>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span className="status-badge" style={{ display: 'inline-block', marginBottom: '0.5rem', background: order.status === 'Pending' ? 'rgba(249,115,22,0.1)' : order.status === 'Ready' ? 'rgba(74,222,128,0.1)' : 'rgba(56,189,248,0.1)', color: order.status === 'Pending' ? 'var(--primary)' : order.status === 'Ready' ? '#4ade80' : '#38bdf8' }}>
+                        {order.status}
+                      </span>
+                      <h4 style={{ margin: 0 }}>${order.totalPrice.toFixed(2)}</h4>
+                    </div>
+                  </div>
+                  <div>
+                    {order.items.map(i => (
+                      <div key={i.snackId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.2rem 0' }}>
+                        <span><span style={{ fontWeight: 700, color: 'var(--primary)' }}>{i.quantity}x</span> {i.title}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+                    {order.status === 'Pending' && (
+                      <button className="btn-primary" onClick={() => updateOrderStatus(order._id, 'Preparing')}>
+                        Accept & Prepare
+                      </button>
+                    )}
+                    {order.status === 'Preparing' && (
+                      <button className="btn-primary" style={{ background: '#4ade80', color: '#000' }} onClick={() => updateOrderStatus(order._id, 'Ready')}>
+                        <CheckCircle size={18} style={{ marginRight: '0.5rem', display: 'inline' }} /> Mark READY
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              {orders.length === 0 && <p style={{ color: 'var(--text-secondary)' }}>No orders have come in yet.</p>}
             </div>
           </div>
         )}
