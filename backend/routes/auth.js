@@ -56,16 +56,24 @@ router.post('/google', async (req, res) => {
 
 router.put('/profile', require('../middleware/auth'), async (req, res) => {
   try {
-    const { firstName, dob } = req.body;
+    const { firstName, dob, mobileNumber } = req.body;
+    
+    // Strict digit validation (e.g. 10+ digits for international support, commonly 10 for India)
+    const mobileRegex = /^[0-9]{10,15}$/;
+    if (!mobileRegex.test(mobileNumber)) {
+      return res.status(400).json({ error: 'Invalid mobile number. Must contain 10 to 15 digits.' });
+    }
+
     let user;
     if (mongoose.connection.readyState === 1) {
       user = await User.findByIdAndUpdate(req.user.userId, {
         firstName,
         dob,
+        mobileNumber,
         profileComplete: true
       }, { new: true });
     } else {
-      user = { _id: req.user.userId, email: req.user.email, firstName, dob, profileComplete: true };
+      user = { _id: req.user.userId, email: req.user.email, firstName, dob, mobileNumber, profileComplete: true };
     }
     
     res.json(user);

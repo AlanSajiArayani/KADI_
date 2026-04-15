@@ -8,7 +8,8 @@ import { ShoppingBag, Minus, Plus } from 'lucide-react';
 
 export default function BakeryCatalog() {
   const { id } = useParams();
-  const { token } = useAuth();
+  const navigate = useNavigate();
+  const { token, user } = useAuth();
   const { addToCart } = useCart();
   const [snacks, setSnacks] = useState([]);
   const [bakeryName, setBakeryName] = useState('Loading...');
@@ -41,15 +42,25 @@ export default function BakeryCatalog() {
 
       <div className="food-catalog-grid">
         {snacks.length > 0 ? snacks.map((snack, idx) => (
-          <ItemCard key={snack._id} snack={snack} idx={idx} bakeryId={id} bakeryName={bakeryName} addToCart={addToCart} />
+          <ItemCard key={snack._id} snack={snack} idx={idx} bakeryId={id} bakeryName={bakeryName} addToCart={addToCart} user={user} navigate={navigate} />
         )) : <p style={{ textAlign: 'center', width: '100%' }}>No items available in this bakery yet.</p>}
       </div>
     </div>
   );
 }
 
-function ItemCard({ snack, idx, bakeryId, bakeryName, addToCart }) {
+function ItemCard({ snack, idx, bakeryId, bakeryName, addToCart, user, navigate }) {
   const [qty, setQty] = useState(1);
+
+  const handlePackIt = () => {
+    if (!user) {
+      if(window.confirm('You must be logged in to place an order. Redirect to login?')) {
+        navigate('/login');
+      }
+      return;
+    }
+    addToCart(bakeryId, bakeryName, snack, qty);
+  };
 
   return (
     <motion.div 
@@ -80,7 +91,7 @@ function ItemCard({ snack, idx, bakeryId, bakeryName, addToCart }) {
             disabled={snack.quantity <= 0}
             className="btn-primary" 
             style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', opacity: snack.quantity <= 0 ? 0.5 : 1 }}
-            onClick={() => addToCart(bakeryId, bakeryName, snack, qty)}
+            onClick={handlePackIt}
           >
             <ShoppingBag size={18} /> PACK IT
           </button>

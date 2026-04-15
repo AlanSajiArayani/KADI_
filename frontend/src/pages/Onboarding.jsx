@@ -7,7 +7,7 @@ import axios from 'axios';
 export default function Onboarding() {
   const { token, completeProfile } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ firstName: '', dob: '' });
+  const [formData, setFormData] = useState({ firstName: '', dob: '', mobileNumber: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -55,14 +55,21 @@ export default function Onboarding() {
             />
           </div>
           <div>
-            <label style={{ display: 'block', textAlign: 'left', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Date of Birth</label>
+            <label style={{ display: 'block', textAlign: 'left', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Mobile Number</label>
             <input 
-              type="date" 
+              type="text" 
+              placeholder="e.g. 9876543210" 
               className="input-glass"
-              value={formData.dob}
-              onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
+              value={formData.mobileNumber}
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                setFormData({ ...formData, mobileNumber: val });
+              }}
               required
+              minLength={10}
+              maxLength={15}
             />
+            <p style={{ textAlign: 'left', fontSize: '0.8rem', color: 'var(--text-secondary)', marginTop: '0.3rem' }}>Required for baker communications.</p>
           </div>
           <button type="submit" className="btn-primary" disabled={loading} style={{ marginTop: '1rem' }}>
             {loading ? 'Saving...' : 'Complete Setup'}

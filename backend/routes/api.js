@@ -4,6 +4,7 @@ const authMiddleware = require('../middleware/auth');
 const Bakery = require('../models/Bakery');
 const Snack = require('../models/Snack');
 const Order = require('../models/Order');
+const User = require('../models/User');
 
 const router = express.Router();
 
@@ -81,10 +82,26 @@ router.post('/orders', authMiddleware, async (req, res) => {
   try {
     const { bakeryId, bakeryName, items, totalPrice } = req.body;
     
+    let customerName = "Unknown Customer";
+    let customerPhone = "N/A";
+
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findById(req.user.userId);
+      if (user) {
+        customerName = user.firstName || user.email;
+        customerPhone = user.mobileNumber || "Not Provided";
+      }
+    } else {
+      customerName = "Mock User Offline";
+      customerPhone = "1234567890";
+    }
+
     if (mongoose.connection.readyState !== 1) {
       const mockOrder = {
         _id: 'mock_order_' + Date.now(),
         userId: req.user.userId,
+        customerName,
+        customerPhone,
         bakeryId,
         bakeryName,
         items,
@@ -98,6 +115,8 @@ router.post('/orders', authMiddleware, async (req, res) => {
 
     const newOrder = await Order.create({
       userId: req.user.userId,
+      customerName,
+      customerPhone,
       bakeryId,
       bakeryName,
       items,

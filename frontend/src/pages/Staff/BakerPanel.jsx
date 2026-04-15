@@ -256,6 +256,8 @@ export default function BakerPanel() {
                     <div>
                       <h3 style={{ margin: 0 }}>Order: {order._id.substring(order._id.length - 6).toUpperCase()}</h3>
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Placed: {new Date(order.createdAt).toLocaleTimeString()}</p>
+                      <p style={{ color: 'var(--text-primary)', fontSize: '0.9rem', marginTop: '0.3rem' }}>Customer: <b>{order.customerName || "Unknown"}</b></p>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Phone: {order.customerPhone || "N/A"}</p>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <span className="status-badge" style={{ display: 'inline-block', marginBottom: '0.5rem', background: order.status === 'Pending' ? 'rgba(249,115,22,0.1)' : order.status === 'Ready' ? 'rgba(74,222,128,0.1)' : 'rgba(56,189,248,0.1)', color: order.status === 'Pending' ? 'var(--primary)' : order.status === 'Ready' ? '#4ade80' : '#38bdf8' }}>
