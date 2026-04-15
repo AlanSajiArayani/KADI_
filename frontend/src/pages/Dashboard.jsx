@@ -26,13 +26,15 @@ export default function Dashboard() {
     });
   }, [user]);
 
+  const BASE_URL = 'http://127.0.0.1:5000';
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
     
     try {
-      const { data } = await axios.put('http://localhost:5000/auth/profile', formData, {
+      const { data } = await axios.put(`${BASE_URL}/auth/profile`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       // Pass the direct server response object to update context
@@ -49,6 +51,9 @@ export default function Dashboard() {
   const formattedDob = user?.dob 
     ? new Date(user.dob).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
     : 'Not provided';
+
+  // Debug log to console to verify what the frontend sees
+  console.log("Current Dashboard User State:", user);
 
   return (
     <div className="minimal-dashboard-container" style={{ padding: '120px 2rem 4rem 2rem' }}>

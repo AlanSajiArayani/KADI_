@@ -13,8 +13,9 @@ export default function AdminPanel() {
   const [bakers, setBakers] = useState([]);
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [fetchError, setFetchError] = useState('');
   
-  const BASE_URL = 'http://localhost:5000';
+  const BASE_URL = 'http://127.0.0.1:5000';
   
   // Modals
   const [showBakerModal, setShowBakerModal] = useState(false);
@@ -30,20 +31,28 @@ export default function AdminPanel() {
 
   const fetchData = async () => {
     setIsLoading(true);
+    setFetchError('');
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      if (activeTab === 'dashboard') {
-        const { data } = await axios.get(`${BASE_URL}/admin/stats`, { headers });
-        setStats(data);
-      } else if (activeTab === 'bakers') {
-        const { data } = await axios.get(`${BASE_URL}/admin/bakers`, { headers });
-        setBakers(Array.isArray(data) ? data : []);
-      } else if (activeTab === 'users') {
-        const { data } = await axios.get(`${BASE_URL}/admin/users`, { headers });
+      console.log(`Fetching ${activeTab} from ${BASE_URL}...`);
+      
+      let endpoint = '';
+      if (activeTab === 'dashboard') endpoint = '/admin/stats';
+      else if (activeTab === 'bakers') endpoint = '/admin/bakers';
+      else if (activeTab === 'users') endpoint = '/admin/users';
+
+      const { data } = await axios.get(`${BASE_URL}${endpoint}`, { headers });
+      
+      if (activeTab === 'dashboard') setStats(data);
+      else if (activeTab === 'bakers') setBakers(Array.isArray(data) ? data : []);
+      else if (activeTab === 'users') {
         setUsers(Array.isArray(data) ? data : []);
+        console.log("Users received:", data.length);
       }
     } catch (err) { 
-      console.error("Fetch Data Error:", err); 
+      const msg = err.response?.data?.error || err.message;
+      setFetchError(msg);
+      console.error("Fetch Data Error:", msg); 
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +131,18 @@ export default function AdminPanel() {
 
         {activeTab === 'users' && (
           <div>
-            <h1 style={{ marginBottom: '2rem' }}>Registered Users</h1>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2rem' }}>
+              <h1>Registered Users</h1>
+              <button className="btn-glass" onClick={fetchData} style={{ fontSize: '0.8rem' }}>Refresh List</button>
+            </div>
+
+            {fetchError && (
+              <div className="glass-panel" style={{ padding: '1rem', marginBottom: '2rem', border: '1px solid #ef4444', color: '#ef4444', textAlign: 'center' }}>
+                <p><b>Connection Error:</b> {fetchError}</p>
+                <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>Make sure the backend is running on {BASE_URL}</p>
+              </div>
+            )}
+            
             <div className="glass-table-wrapper">
               <table className="glass-table">
                 <thead>

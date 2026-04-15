@@ -16,7 +16,7 @@ export default function Onboarding() {
     setLoading(true);
     
     try {
-      const { data } = await axios.put('http://localhost:5000/auth/profile', formData, {
+      const { data } = await axios.put('http://127.0.0.1:5000/auth/profile', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       
@@ -51,6 +51,16 @@ export default function Onboarding() {
               className="input-glass"
               value={formData.firstName}
               onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+              required
+            />
+          </div>
+          <div>
+            <label style={{ display: 'block', textAlign: 'left', marginBottom: '0.5rem', color: 'var(--text-secondary)' }}>Date of Birth</label>
+            <input 
+              type="date" 
+              className="input-glass"
+              value={formData.dob}
+              onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
               required
             />
           </div>

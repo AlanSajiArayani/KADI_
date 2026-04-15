@@ -11,7 +11,7 @@ export default function Home() {
   useEffect(() => {
     const fetchBakeries = async () => {
       try {
-        const res = await axios.get('http://localhost:5000/api/bakeries?lat=0&lng=0');
+        const res = await axios.get('http://127.0.0.1:5000/api/bakeries?lat=0&lng=0');
         setBakeries(res.data);
       } catch (err) {
         setBakeries([

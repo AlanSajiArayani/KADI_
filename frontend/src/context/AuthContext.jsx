@@ -14,6 +14,8 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  const API_URL = 'http://127.0.0.1:5000';
+
   useEffect(() => {
     const hydrateUser = async () => {
       if (token) {
@@ -31,7 +33,7 @@ export const AuthProvider = ({ children }) => {
 
             // Second, fetch real DB instance silently
             try {
-              const { data } = await axios.get('http://localhost:5000/auth/profile', {
+              const { data } = await axios.get(`${API_URL}/auth/profile`, {
                 headers: { Authorization: `Bearer ${token}` }
               });
               // CRITICAL: Deeply merge local state with server state to prevent wiping fields

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
@@ -14,12 +14,14 @@ export default function BakeryCatalog() {
   const [snacks, setSnacks] = useState([]);
   const [bakeryName, setBakeryName] = useState('Loading...');
 
+  const BASE_URL = 'http://127.0.0.1:5000';
+
   useEffect(() => {
     const fetchCatalog = async () => {
       try {
         const [snacksRes, bakRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/snacks?bakeryId=${id}`, { headers: { Authorization: `Bearer ${token}` } }),
-          axios.get('http://localhost:5000/api/bakeries')
+          axios.get(`${BASE_URL}/api/snacks?bakeryId=${id}`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`${BASE_URL}/api/bakeries`)
         ]);
         setSnacks(snacksRes.data);
         const b = bakRes.data.find(b => b._id === id);
@@ -28,7 +30,7 @@ export default function BakeryCatalog() {
         console.error(err);
       }
     };
-    if (token) fetchCatalog();
+    if (id) fetchCatalog();
   }, [id, token]);
 
   return (
