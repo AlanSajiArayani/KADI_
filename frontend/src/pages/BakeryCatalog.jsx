@@ -77,7 +77,7 @@ function ItemCard({ snack, idx, bakeryId, bakeryName, addToCart, user, navigate 
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <h3 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-primary)' }}>{snack.title}</h3>
-            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary)' }}>${(snack.price || 0).toFixed(2)}</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--primary)' }}>₹{(snack.price || 0).toFixed(2)}</span>
           </div>
           <span style={{ fontSize: '0.8rem', color: snack.quantity > 0 ? '#4ade80' : '#f87171' }}>{snack.quantity > 0 ? 'In Stock' : 'Out of Stock'}</span>
         </div>

@@ -62,7 +62,7 @@ export default function Cart() {
                     <img src={item.image} alt={item.title} style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover' }} />
                     <div>
                       <h4 style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</h4>
-                      <p style={{ color: 'var(--text-secondary)' }}>${item.price?.toFixed(2)} each</p>
+                      <p style={{ color: 'var(--text-secondary)' }}>₹{item.price?.toFixed(2)} each</p>
                     </div>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -71,7 +71,7 @@ export default function Cart() {
                       <span>{item.quantity}</span>
                       <button className="btn-glass" style={{ padding: '0.25rem 0.75rem' }} onClick={() => updateQuantity(item._id, item.quantity + 1)}>+</button>
                     </div>
-                    <span style={{ fontWeight: 700, minWidth: '70px', textAlign: 'right' }}>${(item.price * item.quantity).toFixed(2)}</span>
+                    <span style={{ fontWeight: 700, minWidth: '70px', textAlign: 'right' }}>₹{(item.price * item.quantity).toFixed(2)}</span>
                     <button className="btn-glass" onClick={() => removeFromCart(item._id)} style={{ padding: '0.5rem', border: 'none', color: '#f87171' }}>
                       <Trash2 size={20} />
                     </button>
@@ -83,7 +83,7 @@ export default function Cart() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '2rem', background: 'var(--glass-bg)', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
               <div>
                 <p style={{ fontSize: '1.2rem', color: 'var(--text-secondary)' }}>Total Cost</p>
-                <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)' }}>${cartTotal.toFixed(2)}</p>
+                <p style={{ fontSize: '2.5rem', fontWeight: 700, color: 'var(--primary)' }}>₹{cartTotal.toFixed(2)}</p>
               </div>
               <button className="btn-primary" style={{ padding: '1rem 3rem', fontSize: '1.2rem', borderRadius: '30px' }} onClick={placeOrder} disabled={loading}>
                 {loading ? 'Processing...' : 'PACK UP'}

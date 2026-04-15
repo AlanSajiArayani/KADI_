@@ -220,7 +220,7 @@ export default function BakerPanel() {
                         {snack.image ? <img src={snack.image} alt="snack" style={{width: '40px', height: '40px', borderRadius: '8px', objectFit: 'cover'}} /> : <div style={{width: '40px', height: '40px', background: 'var(--glass-bg)', borderRadius: '8px'}}></div>}
                         <span style={{ fontWeight: 600 }}>{snack.title}</span>
                       </td>
-                      <td>${snack.price?.toFixed(2)}</td>
+                      <td>₹{snack.price?.toFixed(2)}</td>
                       <td>{snack.quantity}</td>
                       <td>
                         {snack.quantity > 0 
@@ -263,7 +263,7 @@ export default function BakerPanel() {
                       <span className="status-badge" style={{ display: 'inline-block', marginBottom: '0.5rem', background: order.status === 'Pending' ? 'rgba(249,115,22,0.1)' : order.status === 'Ready' ? 'rgba(74,222,128,0.1)' : 'rgba(56,189,248,0.1)', color: order.status === 'Pending' ? 'var(--primary)' : order.status === 'Ready' ? '#4ade80' : '#38bdf8' }}>
                         {order.status}
                       </span>
-                      <h4 style={{ margin: 0 }}>${order.totalPrice.toFixed(2)}</h4>
+                      <h4 style={{ margin: 0 }}>₹{order.totalPrice.toFixed(2)}</h4>
                     </div>
                   </div>
                   <div>

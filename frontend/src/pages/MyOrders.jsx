@@ -63,14 +63,14 @@ export default function MyOrders() {
                   {order.status === 'Ready' ? <CheckCircle size={18} /> : order.status === 'Preparing' ? <Clock size={18} /> : <Package size={18} />}
                   {order.status}
                 </div>
-                <h4 style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0.5rem 0 0 0' }}>${order.totalPrice.toFixed(2)}</h4>
+                <h4 style={{ fontSize: '1.8rem', fontWeight: 700, color: 'var(--text-primary)', margin: '0.5rem 0 0 0' }}>₹{order.totalPrice.toFixed(2)}</h4>
               </div>
             </div>
             <div>
               {order.items.map(item => (
                 <div key={item.snackId} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', color: 'var(--text-secondary)' }}>
                   <span><span style={{ color: 'var(--primary)', fontWeight: 600 }}>{item.quantity}x</span> {item.title}</span>
-                  <span>${(item.price * item.quantity).toFixed(2)}</span>
+                  <span>₹{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
             </div>
