@@ -35,7 +35,8 @@ export default function Dashboard() {
       const { data } = await axios.put('http://localhost:5000/auth/profile', formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      completeProfile(data); // update local context
+      // Pass the direct server response object to update context
+      completeProfile(data); 
       setIsEditing(false);
     } catch (err) {
       console.error(err);
@@ -131,7 +132,9 @@ export default function Dashboard() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', alignItems: 'center' }}>
             <div style={{ width: '100%', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Mobile Number</p>
-              <p style={{ fontSize: '1.5rem', fontWeight: 500, color: 'var(--text-primary)', marginTop: '0.5rem' }}>{user?.mobileNumber || 'Not provided'}</p>
+              <p style={{ fontSize: '1.5rem', fontWeight: 500, color: user?.mobileNumber ? 'var(--text-primary)' : 'var(--primary)', marginTop: '0.5rem' }}>
+                {user?.mobileNumber || 'Please provide a contact number'}
+              </p>
             </div>
             <div style={{ width: '100%', background: 'rgba(255,255,255,0.02)', padding: '1.5rem', borderRadius: '24px', border: '1px solid var(--glass-border)' }}>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Date of Birth</p>

@@ -1,49 +1,80 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { jwtDecode } from "jwt-decode"; // Fix jwt-decode import
+import { jwtDecode } from "jwt-decode"; 
+import axios from 'axios';
 
 const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const saved = localStorage.getItem('user');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        // Check for expiration
-        if (decoded.exp * 1000 < Date.now()) {
+    const hydrateUser = async () => {
+      if (token) {
+        try {
+          const decoded = jwtDecode(token);
+          if (decoded.exp * 1000 < Date.now()) {
+            logout();
+          } else {
+            // First load local storage
+            setUser(prev => {
+              const merged = { ...decoded, ...prev, profileComplete: prev?.profileComplete || true };
+              localStorage.setItem('user', JSON.stringify(merged));
+              return merged;
+            });
+
+            // Second, fetch real DB instance silently
+            try {
+              const { data } = await axios.get('http://localhost:5000/auth/profile', {
+                headers: { Authorization: `Bearer ${token}` }
+              });
+              setUser(data);
+              localStorage.setItem('user', JSON.stringify(data));
+            } catch (err) { console.error("Could not reach DB for fresh profile", err); }
+          }
+        } catch (err) {
           logout();
-        } else {
-          // You ideally fetch full profile from /api/profile here.
-          // For demo, we decode what is available, and use default "profileComplete: true" to skip onboarding in mock flow
-          setUser({ ...decoded, profileComplete: Boolean(decoded.profileComplete) || true });
         }
-      } catch (err) {
-        logout();
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+    
+    hydrateUser();
   }, [token]);
 
   const login = (jwtToken, userData) => {
     localStorage.setItem('token', jwtToken);
+    localStorage.setItem('user', JSON.stringify(userData));
     setToken(jwtToken);
     setUser(userData);
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setToken(null);
     setUser(null);
   };
 
   const completeProfile = (userData) => {
-    setUser({ ...user, ...userData, profileComplete: true });
-  }
+    setUser(prevUser => {
+      const updated = { 
+        ...prevUser, 
+        ...userData, 
+        profileComplete: true,
+        // Explicit priority for new mobile number if present
+        mobileNumber: userData.mobileNumber || prevUser?.mobileNumber 
+      };
+      localStorage.setItem('user', JSON.stringify(updated));
+      return updated;
+    });
+  };
 
   return (
     <AuthContext.Provider value={{ user, token, login, logout, completeProfile, loading }}>

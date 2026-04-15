@@ -71,4 +71,22 @@ router.delete('/bakers/:id', async (req, res) => {
   } catch (err) { res.status(500).json({ error: 'Error deleting baker' }); }
 });
 
+// Registered Users View
+router.get('/users', async (req, res) => {
+  try {
+    if (mongoose.connection.readyState !== 1) {
+      return res.json([
+        { _id: 'u1', firstName: 'John', email: 'john@example.com', mobileNumber: '9876543210', dob: '1990-01-01', createdAt: new Date() },
+        { _id: 'u2', firstName: 'Jane', email: 'jane@example.com', mobileNumber: '8765432109', dob: '1992-05-15', createdAt: new Date() }
+      ]);
+    }
+    // Fetch all users including those with partial profiles
+    const users = await User.find().sort({ createdAt: -1 });
+    res.json(users);
+  } catch (err) {
+    console.error("Admin Fetch Users Error:", err);
+    res.status(500).json({ error: 'Error fetching users' });
+  }
+});
+
 module.exports = router;

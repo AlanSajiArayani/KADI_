@@ -82,4 +82,18 @@ router.put('/profile', require('../middleware/auth'), async (req, res) => {
   }
 });
 
+router.get('/profile', require('../middleware/auth'), async (req, res) => {
+  try {
+    if (mongoose.connection.readyState === 1) {
+      const user = await User.findById(req.user.userId);
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      return res.json(user);
+    } else {
+      return res.json({ _id: req.user.userId, email: req.user.email, profileComplete: true });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Server error fetching profile' });
+  }
+});
+
 module.exports = router;
