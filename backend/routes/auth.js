@@ -89,7 +89,15 @@ router.get('/profile', require('../middleware/auth'), async (req, res) => {
       if (!user) return res.status(404).json({ error: 'User not found' });
       return res.json(user);
     } else {
-      return res.json({ _id: req.user.userId, email: req.user.email, profileComplete: true });
+      // Mock fallback: Return dummy data so UI doesn't look empty in offline demo mode
+      return res.json({ 
+        _id: req.user.userId, 
+        email: req.user.email, 
+        firstName: 'Demo User',
+        mobileNumber: '9876543210',
+        dob: '1995-10-10',
+        profileComplete: true 
+      });
     }
   } catch (err) {
     res.status(500).json({ error: 'Server error fetching profile' });

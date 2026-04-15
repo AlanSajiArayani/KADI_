@@ -37,10 +37,10 @@ export default function AdminPanel() {
         setStats(data);
       } else if (activeTab === 'bakers') {
         const { data } = await axios.get(`${BASE_URL}/admin/bakers`, { headers });
-        setBakers(data);
+        setBakers(Array.isArray(data) ? data : []);
       } else if (activeTab === 'users') {
         const { data } = await axios.get(`${BASE_URL}/admin/users`, { headers });
-        setUsers(data);
+        setUsers(Array.isArray(data) ? data : []);
       }
     } catch (err) { 
       console.error("Fetch Data Error:", err); 

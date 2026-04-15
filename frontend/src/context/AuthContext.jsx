@@ -34,8 +34,12 @@ export const AuthProvider = ({ children }) => {
               const { data } = await axios.get('http://localhost:5000/auth/profile', {
                 headers: { Authorization: `Bearer ${token}` }
               });
-              setUser(data);
-              localStorage.setItem('user', JSON.stringify(data));
+              // CRITICAL: Deeply merge local state with server state to prevent wiping fields
+              setUser(prev => {
+                const updated = { ...prev, ...data };
+                localStorage.setItem('user', JSON.stringify(updated));
+                return updated;
+              });
             } catch (err) { console.error("Could not reach DB for fresh profile", err); }
           }
         } catch (err) {
